@@ -11,16 +11,15 @@ const TaskCard = ({ task, onUpdate, onDelete }) => {
   const [editDescription, setEditDescription] = useState(task.description || "")
 
   const handleToggleComplete = () => {
-    onUpdate(task.Id, {
-      status: task.status === "completed" ? "active" : "completed",
-      completedAt: task.status === "completed" ? null : new Date().toISOString()
+onUpdate(task.Id, {
+      status: task.status === "completed" ? "active" : "completed"
     })
   }
 
   const handleSaveEdit = () => {
     if (!editTitle.trim()) return
     
-    onUpdate(task.Id, {
+onUpdate(task.Id, {
       title: editTitle.trim(),
       description: editDescription.trim()
     })

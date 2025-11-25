@@ -11,7 +11,7 @@ import { taskService } from "@/services/api/taskService"
 import ApperIcon from "@/components/ApperIcon"
 
 const TaskFlow = () => {
-  const [tasks, setTasks] = useState([])
+const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [filter, setFilter] = useState("all")
@@ -39,8 +39,10 @@ const TaskFlow = () => {
   const handleAddTask = async (taskData) => {
     try {
       const newTask = await taskService.create(taskData)
-      setTasks(prev => [newTask, ...prev])
-      toast.success("Task added successfully!")
+      if (newTask) {
+        setTasks(prev => [newTask, ...prev])
+        toast.success("Task added successfully!")
+      }
     } catch (err) {
       toast.error("Failed to add task")
       console.error("Error adding task:", err)
@@ -50,14 +52,16 @@ const TaskFlow = () => {
   const handleUpdateTask = async (id, updates) => {
     try {
       const updatedTask = await taskService.update(id, updates)
-      setTasks(prev => prev.map(task => task.Id === id ? updatedTask : task))
-      
-      if (updates.status === "completed") {
-        setShowCompletion(true)
-        setTimeout(() => setShowCompletion(false), 1000)
-        toast.success("Task completed! Great job! 🎉")
-      } else {
-        toast.success("Task updated successfully!")
+      if (updatedTask) {
+        setTasks(prev => prev.map(task => task.Id === id ? updatedTask : task))
+        
+        if (updates.status === "completed") {
+          setShowCompletion(true)
+          setTimeout(() => setShowCompletion(false), 1000)
+          toast.success("Task completed! Great job! 🎉")
+        } else {
+          toast.success("Task updated successfully!")
+        }
       }
     } catch (err) {
       toast.error("Failed to update task")
@@ -67,9 +71,11 @@ const TaskFlow = () => {
 
   const handleDeleteTask = async (id) => {
     try {
-      await taskService.delete(id)
-      setTasks(prev => prev.filter(task => task.Id !== id))
-      toast.success("Task deleted successfully")
+      const success = await taskService.delete(id)
+      if (success) {
+        setTasks(prev => prev.filter(task => task.Id !== id))
+        toast.success("Task deleted successfully")
+      }
     } catch (err) {
       toast.error("Failed to delete task")
       console.error("Error deleting task:", err)
