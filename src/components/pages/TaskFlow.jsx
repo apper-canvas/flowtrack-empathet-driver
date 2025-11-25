@@ -141,8 +141,15 @@ const [tasks, setTasks] = useState([])
             <ApperIcon name="AlertCircle" className="w-10 h-10 text-error-500" />
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-slate-900 mb-2">Oops! Something went wrong</h3>
-            <p className="text-slate-600 mb-6">{error}</p>
+<h3 className="text-xl font-semibold text-slate-900 mb-2">Oops! Something went wrong</h3>
+            <p className="text-slate-600 mb-6">
+              {error && typeof error === 'object' && error.message
+                ? error.message === "Sorry, something went wrong. Please contact support"
+                  ? "Unable to load tasks. Please check your connection and try again."
+                  : error.message
+                : error || "Unable to load tasks. Please check your connection and try again."
+              }
+            </p>
             <button
               onClick={loadTasks}
               className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors duration-200 font-medium"
