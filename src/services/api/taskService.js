@@ -14,7 +14,7 @@ export const taskService = {
 
       const params = {
         fields: [
-          {"field": {"Name": "Id"}},
+{"field": {"Name": "Id"}},
           {"field": {"Name": "title_c"}},
           {"field": {"Name": "description_c"}},
           {"field": {"Name": "priority_c"}},
@@ -61,7 +61,7 @@ export const taskService = {
 
       const params = {
         fields: [
-          {"field": {"Name": "Id"}},
+{"field": {"Name": "Id"}},
           {"field": {"Name": "title_c"}},
           {"field": {"Name": "description_c"}},
           {"field": {"Name": "priority_c"}},
@@ -99,7 +99,7 @@ export const taskService = {
     }
   },
 
-  async create(taskData) {
+async create(taskData) {
     try {
       const apperClient = await getApperClient();
       if (!apperClient) {
@@ -139,7 +139,7 @@ export const taskService = {
 
         if (successful.length > 0) {
           const item = successful[0].data;
-          return {
+          const createdTask = {
             Id: item.Id,
             title: item.title_c || "",
             description: item.description_c || "",
@@ -148,6 +148,32 @@ export const taskService = {
             createdAt: item.CreatedOn || new Date().toISOString(),
             completedAt: item.status_c === "completed" ? item.CreatedOn : null
           };
+
+          // Create file records if files are provided
+          if (taskData.files && Array.isArray(taskData.files) && taskData.files.length > 0) {
+            try {
+              const { fileService } = await import('./fileService');
+              
+              for (const file of taskData.files) {
+                const convertedFile = window.ApperSDK?.ApperFileUploader?.toCreateFormat?.(file) || file;
+                
+                await fileService.create({
+                  name: file.name || `File for ${item.title_c}`,
+                  fileData: convertedFile,
+                  taskId: item.Id,
+                  description: `File attached to task: ${item.title_c}`,
+                  fileSizeKb: Math.round((file.size || 0) / 1024),
+                  fileType: file.type || 'unknown',
+                  uploadDate: new Date().toISOString()
+                });
+              }
+            } catch (fileError) {
+              console.error('Error creating file records:', fileError);
+              toast.error('Task created but some files could not be uploaded');
+            }
+          }
+
+          return createdTask;
         }
       }
 
